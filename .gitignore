@@ -1,3 +1,10 @@
+# Mac Cache
+*.DS_Store
+
+# Internal Config files
+env.yml
+config.yml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
