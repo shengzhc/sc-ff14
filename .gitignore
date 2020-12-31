@@ -1,6 +1,11 @@
 # Mac Cache
 *.DS_Store
 
+# Tutorial Results
+tutorials/**/*.json
+tutorials/**/*.jl
+tutorials/**/*.html
+
 # Internal Config files
 env.yml
 config.yml
