@@ -14,7 +14,12 @@ class GatheringSpider(scrapy.Spider):
 	]
 
 	def parse(self, response):
-		page = response.url.split("/")[-2]
-        filename = f'downloads/gathering-{page}.html'
-        with open(filename, 'wb') as f:
-            f.write(response.body)
+		nodes = response.selector.xpath("//tbody/tr")
+		for node in nodes:
+			yield {
+				'item': node.xpath(".//td[1]/text()").get(),
+				'level': node.xpath(".//td[2]/text()").get(),
+				'location': node.xpath(".//td[4]/text()").get(),
+				'time': node.xpath(".//td[6]/text()").get(),
+				'class': node.xpath(".//td[7]/text()").get(),
+			}
