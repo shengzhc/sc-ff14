@@ -14,7 +14,7 @@ class GatheringSpider(scrapy.Spider):
 	]
 
 	def parse(self, response):
-		nodes = response.selector.xpath("//tbody/tr")
+		nodes = response.selector.xpath("//table[contains(@id, 'myTable')]/tbody/tr")
 		for node in nodes:
 			yield {
 				'item': node.xpath(".//td[1]/text()").get(),
