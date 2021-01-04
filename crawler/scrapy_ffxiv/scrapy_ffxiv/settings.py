@@ -62,9 +62,11 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'scrapy_ffxiv.pipelines.ScrapyFfxivPipeline': 300,
-#}
+ITEM_PIPELINES = {
+	'scrapy_ffxiv.pipelines.FfxivGatheringNodeValidationPipeline': 100,
+	'scrapy_ffxiv.pipelines.FfxivGatheringNodeDedupPipeline': 101,
+	'scrapy_ffxiv.pipelines.FfxivGatheringNodeJSONPipeline': 102,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

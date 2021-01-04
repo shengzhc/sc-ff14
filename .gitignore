@@ -1,6 +1,11 @@
 # Mac Cache
 *.DS_Store
 
+# Scrapy
+crawler/**/*.json
+crawler/**/*.jl
+crawler/**/*.html
+
 # Tutorial Results
 tutorials/**/*.json
 tutorials/**/*.jl
