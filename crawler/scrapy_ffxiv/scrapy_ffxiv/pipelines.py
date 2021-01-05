@@ -10,8 +10,8 @@ from scrapy.exceptions import DropItem
 import logging, json, mysql.connector, yaml
 
 _DB_TABLES = {}
-_DB_TABLES['ff14-gathering-nodes'] = """
-CREATE TABLE IF NOT EXISTS `ff14-gathering-nodes` (
+_DB_TABLES['ff14_gathering_nodes'] = """
+CREATE TABLE IF NOT EXISTS `ff14_gathering_nodes` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
 	`name` varchar(256) NOT NULL,
 	`location` varchar(256) NOT NULL,
@@ -55,9 +55,16 @@ class FfxivGatheringNodeJSONPipeline:
 
 	def process_item(self, item, spider):
 		self.gathering_nodes.append(ItemAdapter(item).asdict())
+		return item
 
 
 class FfxivGatheringNodeMysqlPipeline:
+	add_gathering_node = """
+		INSERT INTO `ff14_gathering_nodes`
+		(`name`, `location`, `time`, `gclass`)
+		VALUES (%s, %s, %s, %s)
+	"""
+
 	def __init__(self):
 		self.dbconnection = None
 		with open('dbconfig.yml', 'r') as f:
@@ -73,15 +80,25 @@ class FfxivGatheringNodeMysqlPipeline:
 	def open_spider(self, spider):
 		try:
 			self.dbconnection = mysql.connector.connect(host=self._hostname, user=self._username, password=self._password, database=self._dbname)
-			cursor = self.dbconnection.cursor()
-			cursor.execute(_DB_TABLES['ff14-gathering-nodes'])
+			self.cursor = self.dbconnection.cursor()
+			self.cursor.execute(_DB_TABLES['ff14_gathering_nodes'])
 		except mysql.connector.Error as err:
 			logging.error(f"Something went wrong: {err}")
-		cursor.close()
+			self.cursor.close()
+			self.dbconnection.close()
+			self.cursor = None
+			self.dbconnection = None
 
 	def close_spider(self, spider):
+		if self.cursor is not None:
+			self.cursor.close()
 		if self.dbconnection is not None:
+			self.dbconnection.commit()
 			self.dbconnection.close()
 
 	def process_item(self, item, spider):
+		adapter = ItemAdapter(item)
+		if self.cursor and self.dbconnection:
+			self.cursor.execute(self.__class__.add_gathering_node, 
+								(adapter['name'], adapter['location'], adapter['time'], adapter['gclass']))
 		return  item
