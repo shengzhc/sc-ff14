@@ -7,7 +7,8 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
-import logging, json
+import logging, json, mysql.connector
+
 
 class FfxivGatheringNodeValidationPipeline:
 	def process_item(self, item, spider):
@@ -18,6 +19,7 @@ class FfxivGatheringNodeValidationPipeline:
 			return DropItem(f"gclass field invalid")
 		else:
 			return item
+
 
 class FfxivGatheringNodeDedupPipeline:
 	def __init__(self):
@@ -31,6 +33,7 @@ class FfxivGatheringNodeDedupPipeline:
 			self.gathering_nodes_seen.add(adapter['name'])
 			return item
 
+
 class FfxivGatheringNodeJSONPipeline:
 	def __init__(self):
 		self.gathering_nodes = []
@@ -41,3 +44,16 @@ class FfxivGatheringNodeJSONPipeline:
 
 	def process_item(self, item, spider):
 		self.gathering_nodes.append(ItemAdapter(item).asdict())
+
+
+class FfxivGatheringNodeMysqlPipeline:
+	def __init__(self):
+		pass
+
+	def open_spider(self, spider):
+		pass
+
+	def close_spider(self, spider):
+		pass
+
+	def process_item(self, item, spider):
