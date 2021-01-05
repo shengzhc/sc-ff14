@@ -11,7 +11,7 @@ Spider to gather info from `www.ffxiv-gathering.com`
 """
 
 class GatheringSpider(CrawlSpider):
-	name = 'ffxiv-gathering'
+	name = 'ff14-gathering'
 	allowed_domains = [
 		'ffxiv-gathering.com',
 		'ff14fish.carbuncleplushy.com'

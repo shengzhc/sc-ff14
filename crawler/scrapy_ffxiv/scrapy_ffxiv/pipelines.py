@@ -7,7 +7,7 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
-import logging, json, mysql.connector
+import logging, json, mysql.connector, yaml
 
 
 class FfxivGatheringNodeValidationPipeline:
@@ -48,12 +48,21 @@ class FfxivGatheringNodeJSONPipeline:
 
 class FfxivGatheringNodeMysqlPipeline:
 	def __init__(self):
-		pass
+		with open('dbconfig.yml', 'r') as f:
+			dbconfig = yaml.load(f, yaml.FullLoader)
+		try:
+			self._dbname = dbconfig['database']['name']
+			self._hostname = dbconfig['database']['hostname']
+			self._username = dbconfig['database']['username']
+			self._password = dbconfig['database']['password']
+		except Exception as ex:
+			logging.error(f"Failed to read db config: {ex}")
 
 	def open_spider(self, spider):
-		pass
+		logging.info(f"AAAAAA:{self._dbname}{self._hostname}{self._username}{self._password}")
 
 	def close_spider(self, spider):
 		pass
 
 	def process_item(self, item, spider):
+		return  item
