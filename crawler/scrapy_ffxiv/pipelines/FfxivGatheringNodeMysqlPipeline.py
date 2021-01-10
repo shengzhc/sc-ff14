@@ -24,43 +24,6 @@ CREATE TABLE IF NOT EXISTS `ff14_gathering_nodes` (
 """
 
 
-class FfxivGatheringNodeValidationPipeline:
-    def process_item(self, item, spider):
-        adapter = ItemAdapter(item)
-        if adapter['name'] is None or not isinstance(adapter['name'], str):
-            return DropItem(f"name field invalid...")
-        elif adapter['gclass'] is None or not isinstance(adapter['gclass'], str):
-            return DropItem(f"gclass field invalid")
-        else:
-            return item
-
-
-class FfxivGatheringNodeDedupPipeline:
-    def __init__(self):
-        self.gathering_nodes_seen = set()
-
-    def process_item(self, item, spider):
-        adapter = ItemAdapter(item)
-        if adapter['name'] in self.gathering_nodes_seen:
-            raise DropItem(f"Duplicate item found: {item}.")
-        else:
-            self.gathering_nodes_seen.add(adapter['name'])
-            return item
-
-
-class FfxivGatheringNodeJSONPipeline:
-    def __init__(self):
-        self.gathering_nodes = []
-
-    def close_spider(self, spider):
-        with open('data.json', 'w') as f:
-            json.dump(self.gathering_nodes, f)
-
-    def process_item(self, item, spider):
-        self.gathering_nodes.append(ItemAdapter(item).asdict())
-        return item
-
-
 class FfxivGatheringNodeMysqlPipeline:
     add_gathering_node = """
         INSERT INTO `ff14_gathering_nodes`
@@ -70,7 +33,7 @@ class FfxivGatheringNodeMysqlPipeline:
 
     def __init__(self):
         self.dbconnection = None
-        with open('dbconfig.yml', 'r') as f:
+        with open('db/dbconfig.yml', 'r') as f:
             dbconfig = yaml.load(f, yaml.FullLoader)
         try:
             self._dbname = dbconfig['database']['name']
