@@ -14,5 +14,5 @@ class SplashSpider(scrapy.Spider):
 
     def parse_result(self, response):
         page = response.url.split("/")[-2]
-        with open(f"downloads/{page}.html", "wb") as f:
+        with open(f"temp/{page}.html", "wb") as f:
             f.write(response.body)

@@ -6,6 +6,7 @@ crawler/**/*.json
 crawler/**/*.jl
 crawler/**/*.html
 crawler/**/dbconfig.*
+crawler/temp/
 
 # Tutorial Results
 tutorials/**/*.json
