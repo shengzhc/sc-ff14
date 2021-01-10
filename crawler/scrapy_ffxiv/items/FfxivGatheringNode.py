@@ -6,8 +6,9 @@
 from scrapy.item import Item, Field
 from typing import Optional
 
+
 class FfxivGatheringNode(Item):
-	name = Field()
-	location = Field()
-	time = Field()
-	gclass = Field()
+    name = Field()
+    location = Field()
+    time = Field()
+    gclass = Field()
