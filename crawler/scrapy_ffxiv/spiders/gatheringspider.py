@@ -15,7 +15,6 @@ class GatheringSpider(CrawlSpider):
     name = 'ff14-gathering'
     allowed_domains = [
         'ffxiv-gathering.com',
-        'ff14fish.carbuncleplushy.com'
     ]
     start_urls = [
         'https://www.ffxiv-gathering.com/all.php',
