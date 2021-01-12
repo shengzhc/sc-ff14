@@ -20,4 +20,4 @@ def eorzea_format_time():
     t = dt.utctimetuple()
     am_pm = "PM" if t.tm_hour > 11 else "AM"
     hour = t.tm_hour if t.tm_hour <= 12 else t.tm_hour - 12
-    return "{:02d}:{:02d} {}".format(hour, t.tm_min, am_pm)
+    return "{:02d}:{:02d} {} EORZEA Time".format(hour, t.tm_min, am_pm)
