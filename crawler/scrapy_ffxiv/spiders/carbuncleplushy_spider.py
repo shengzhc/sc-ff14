@@ -1,6 +1,7 @@
 import scrapy
 import requests
 import js2py
+from scrapy_ffxiv.items import FfxivFishingSpot
 
 
 class CarbuncleplushySpider(scrapy.Spider):
@@ -18,5 +19,6 @@ class CarbuncleplushySpider(scrapy.Spider):
 
     def parse_fishing_data(self, response):
         # next diff to parse the js file
-        ret = js2py.eval_js(response.text).to_dict()
-        breakpoint()
+        data = js2py.eval_js(response.text).to_dict()
+        for _, spot in data['FISHING_SPOTS'].items():
+            yield FfxivFishingSpot(id=spot['_id'], name=spot['name_en'], map_coords=(spot['map_coords'][0], spot['map_coords'][1]), territory_id=spot['territory_id'])
