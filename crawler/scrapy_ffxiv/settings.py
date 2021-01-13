@@ -69,9 +69,9 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'scrapy_ffxiv.pipelines.FfxivGatheringNodeValidationPipeline': 100,
-    'scrapy_ffxiv.pipelines.FfxivGatheringNodeDedupPipeline': 101,
-    'scrapy_ffxiv.pipelines.FfxivGatheringNodeJSONPipeline': 102,
+    # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeValidationPipeline': 100,
+    # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeDedupPipeline': 101,
+    # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeJSONPipeline': 102,
     # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeMysqlPipeline': 103,
 }
 
