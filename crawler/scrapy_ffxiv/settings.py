@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = 'scrapy_ffxiv.spiders'
 #USER_AGENT = 'scrapy_ffxiv (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -52,7 +52,7 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 # SPLASH_URL = 'http://0.0.0.0:8050'
 DOWNLOADER_MIDDLEWARES = {
-    'scrapy_ffxiv.middlewares.ScrapyFfxivDownloaderMiddleware': 700,
+    'scrapy_ffxiv.middlewares.downloader.CommentFixerDownloaderMiddleware': 700,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
 }
 
