@@ -4,7 +4,12 @@ import js2py
 from scrapy_ffxiv.items import FfxivFishingSpot
 
 
-class CarbuncleplushySpider(scrapy.Spider):
+class CarbuncleplushySpider_Deprecated(scrapy.Spider):
+
+    """
+    This spider is not under development...
+    """
+
     _carbuncleplushy_base_url = 'https://ff14fish.carbuncleplushy.com'
     name = 'carbuncleplushy-spider'
     start_urls = [
