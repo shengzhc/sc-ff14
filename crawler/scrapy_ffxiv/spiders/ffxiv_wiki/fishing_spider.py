@@ -20,6 +20,6 @@ class fishing_spider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        sections = response.selector.xpath("//table[contains(@class, 'gathering-role')]/tbody").getall()
-        for section in sections:
+        rows = response.selector.xpath("//table[contains(@class, 'gathering-role')]//tr[position()>1]//td/..").getall()
+        for row in rows:
             breakpoint()
