@@ -16,7 +16,7 @@ class FfxivWikiFishDropDetails:
     weather: list
 
 
-@dataclass
+@ dataclass
 class FfxivWikiFish:
     name: str
     recommend_level: int
