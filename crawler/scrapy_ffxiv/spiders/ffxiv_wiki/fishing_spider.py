@@ -1,6 +1,7 @@
 import scrapy
 import requests
 from scrapy_ffxiv.items.ffxiv_wiki_fish import FfxivWikiFish, FfxivWikiFishDropDetails
+from scrapy import Selector
 
 
 class fishing_spider(scrapy.Spider):
@@ -38,8 +39,13 @@ class fishing_spider(scrapy.Spider):
             yield response.follow(follow_url, self.parse_fish_page, cb_kwargs=dict(name=name))
 
     def parse_fish_page(self, response, name):
-# >>> response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/../following-sibling::*[1]").getall()
+        basic_info = self.__parse_fish_basic_info__(response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/../following-sibling::*[1]").get())
 
-        # response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/..").get()
-        response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/..").get()
-        breakpoint()
+    def __parse_fish_basic_info__(self, basic_info_str):
+        sel = Selector(text=basic_info_str)
+        return {
+            "recommend_level": sel.xpath("//li[1]/text()").re(r"\d+$"),
+            "fish_type": sel.xpath("//li[3]/a[1]/text()").get(),
+            "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get()
+            "size_range_str": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$")
+        }
