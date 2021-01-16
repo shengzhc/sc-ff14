@@ -4,7 +4,7 @@ import scrapy
 class HtmlDownloadSpider(scrapy.Spider):
     name = 'html_download_spider'
     start_urls = [
-        'https://ffxiv.consolegameswiki.com/wiki/Hard_Candy',
+        'https://ffxiv.consolegameswiki.com/wiki/Lominsan_Anchovy',
     ]
 
     def parse(self, response):

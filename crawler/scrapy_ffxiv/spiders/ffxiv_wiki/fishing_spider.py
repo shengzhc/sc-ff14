@@ -40,12 +40,14 @@ class fishing_spider(scrapy.Spider):
 
     def parse_fish_page(self, response, name):
         basic_info = self.__parse_fish_basic_info__(response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/../following-sibling::*[1]").get())
+        # purchase_info
+        # drop_info = self.__parse_fish_basic_info__(response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/../following-sibling::*[1]").get())
 
     def __parse_fish_basic_info__(self, basic_info_str):
         sel = Selector(text=basic_info_str)
         return {
             "recommend_level": sel.xpath("//li[1]/text()").re(r"\d+$"),
             "fish_type": sel.xpath("//li[3]/a[1]/text()").get(),
-            "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get()
-            "size_range_str": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$")
+            "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
+            "size_range_str": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
         }
