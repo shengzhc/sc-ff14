@@ -7,6 +7,18 @@ from dataclasses import dataclass
 
 
 @dataclass
+class FfxivWikiFishDropDetails:
+    location: str
+    location_coordinates: tuple
+    baits: list
+    mooched_from: list
+    condition: list
+    weather: list
+
+
+@dataclass
 class FfxivWikiFish:
     name: str
-    coordinates: tuple
+    recommend_level: int
+    fish_type: str
+    drops: list
