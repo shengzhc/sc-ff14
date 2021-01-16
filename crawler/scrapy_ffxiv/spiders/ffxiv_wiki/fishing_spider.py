@@ -1,5 +1,6 @@
 import scrapy
 import requests
+from scrapy_ffxiv.items.ffxiv_wiki_fish import FfxivWikiFish, FfxivWikiFishDropDetails
 
 
 class fishing_spider(scrapy.Spider):
