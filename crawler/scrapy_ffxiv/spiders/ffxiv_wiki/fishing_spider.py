@@ -38,4 +38,8 @@ class fishing_spider(scrapy.Spider):
             yield response.follow(follow_url, self.parse_fish_page, cb_kwargs=dict(name=name))
 
     def parse_fish_page(self, response, name):
+# >>> response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/../following-sibling::*[1]").getall()
+
+        # response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/..").get()
+        response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/..").get()
         breakpoint()
