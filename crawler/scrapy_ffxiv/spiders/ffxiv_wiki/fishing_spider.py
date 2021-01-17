@@ -51,7 +51,7 @@ class fishing_spider(scrapy.Spider):
         )
         sel = Selector(text=response.selector.xpath(xpath).get())
         return {
-            "recommend_level": sel.xpath("//li[1]/text()").re(r"\d+$")[0],
+            "recommend_level": int(sel.xpath("//li[1]/text()").re(r"\d+$")[0]),
             "fish_type": sel.xpath("//li[2]/a[1]/text()").get(),
             "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
             "size_range_str": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
@@ -79,11 +79,10 @@ class fishing_spider(scrapy.Spider):
         for idx, drop_info in enumerate(response.selector.xpath(xpath).getall()):
             sel = Selector(text=drop_info)
             drops.append({
-                "location": sel.xpath("//a[@title='Location']/following-sibling::a[1]/text()").get(),
-                "coordinates": sel.xpath("//li[1]/b/text()").re(r"[0-9.]+"),
-                "hole_level": sel.xpath("//li[2]/text()").re(r"[0-9.]+"),
+                "location": sel.xpath("//a[@title='Location']/../following-sibling::a[1]/text()").get(),
+                "coordinates": tuple(map(lambda x: float(x), sel.xpath("//li[1]/text()").re(r"[0-9.]+"))),
+                "hole_level": int(sel.xpath("//li[2]/text()").re(r"[0-9.]+")[0]),
                 "baits": sel.xpath("//li[3]//a[not(@title='Baits')]/text()").getall(),
-                "fishing_log": response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")
+                "fishing_log": response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")[0],
             })
-            breakpoint()
         return drops
