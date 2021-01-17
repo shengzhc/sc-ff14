@@ -42,6 +42,7 @@ class fishing_spider(scrapy.Spider):
     def __parse_fish_page__(self, response, name):
         basic_info = self.__parse_fish_basic_info__(response)
         purchased_from = self.__parse_fish_purchased_from_info__(response)
+        drops = self.__parse_fish_drops_info__(response)
 
     def __parse_fish_basic_info__(self, response):
         xpath = xpath_nodeset_intersection(
@@ -62,13 +63,12 @@ class fishing_spider(scrapy.Spider):
             "//div[@id='mw-content-text']/h3[span[@id='Dropped_By']]/preceding-sibling::ul"
         )
         sel = Selector(text=response.selector.xpath(xpath).get())
-        cnt = int(float(sel.xpath("count(//ul/li)")))
-        breakpoint()
-        return map(lambda idx: {
+        cnt = int(float(sel.xpath("count(//ul/li)").get()))
+        return list(map(lambda idx: {
             "vendor": sel.xpath(f"//ul/li[{idx+1}]/a[1]/text()").get(),
             "area": sel.xpath(f"//ul/li[{idx+1}]/a[2]/text()").get(),
-            "coordinates": sel.xpath(f"//ul/li[{idx+1}]/text()").re(r"[0-9.]+"),
-        }, range(cnt))
+            "coordinates": tuple(map(lambda x: float(x), sel.xpath(f"//ul/li[{idx+1}]/text()").re(r"[0-9.]+"))),
+        }, range(cnt)))
 
     def __parse_fish_drops_info__(self, response):
         xpath = xpath_nodeset_intersection(
