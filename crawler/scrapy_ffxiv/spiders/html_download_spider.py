@@ -4,10 +4,11 @@ import scrapy
 class HtmlDownloadSpider(scrapy.Spider):
     name = 'html_download_spider'
     start_urls = [
-        'https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations',
+        'https://ffxiv.consolegameswiki.com/wiki/Abalathian_Bitterling',
     ]
 
     def parse(self, response):
+        breakpoint()
         page = response.url.split("/")[-2]
         filename = f'temp/{page}.html'
         with open(filename, 'wb') as f:

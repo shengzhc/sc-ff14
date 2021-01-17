@@ -17,10 +17,10 @@ class fishing_spider(scrapy.Spider):
         "ffxiv.consolegameswiki.com",
     ]
     start_urls = [
-        "https://ffxiv.consolegameswiki.com/wiki/Fishing_Locations",
-        "https://ffxiv.consolegameswiki.com/wiki/Heavensward_Fishing_Locations",
-        "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations",  # no data
-        "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations",  # no data
+        # "https://ffxiv.consolegameswiki.com/wiki/Fishing_Locations",
+        # "https://ffxiv.consolegameswiki.com/wiki/Heavensward_Fishing_Locations",
+        # "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations",
+        "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations",
     ]
 
     site_base = "https://ffxiv.consolegameswiki.com/"
@@ -34,24 +34,19 @@ class fishing_spider(scrapy.Spider):
     }
 
     def parse(self, response):
-        rows = response.selector.xpath(f"//table[contains(@class, '{self.url_fish_lookup[response.url][0]}')]//tr[position()>1]//td/..")
+        rows = response.selector.xpath(f"//table[contains(@class, '{self.url_fish_lookup[response.url][0]}')]//tr[position()>1]//td/..").getall()
+        col = self.url_fish_lookup[response.url][1]
         for row in rows:
-            col = self.url_fish_lookup[response.url][1]
-            name = row.xpath(f"td[{col}]/a/text()").get()
-            follow_url = requests.compat.urljoin(self.site_base, row.xpath(f"td[{col}]/a/@href").get())
-            yield response.follow(follow_url, self.__parse_fish_page__, cb_kwargs=dict(name=name, parent_url=response.url))
+            sel = Selector(text=row)
+            names = sel.xpath(f"//td[{col}]/a/text()").getall()
+            for idx, name in enumerate(names):
+                follow_url = requests.compat.urljoin(self.site_base, sel.xpath(f"//td[{col}]/a[{idx+1}]/@href").get())
+                yield response.follow(follow_url, self.__parse_fish_page__, cb_kwargs=dict(name=name, parent_url=response.url))
 
     def __parse_fish_page__(self, response, name, parent_url):
         basic_info = self.__parse_fish_basic_info__(response)
         vendors = self.__parse_fish_purchased_from_vendors__(response)
         drops = self.__parse_fish_drops_info__(response)
-
-        if basic_info is None:
-            self.logger.error(f"""
-                __parse_fish_page__ failed in parsing fish: {name}\n
-                fish page: {response.url}\n 
-                parent url: {parent_url}\n
-                """)
 
         yield FfxivWikiFish(name=name,
                             recommend_level=basic_info["recommend_level"] if basic_info is not None else 0,
@@ -64,7 +59,7 @@ class fishing_spider(scrapy.Spider):
     def __parse_fish_basic_info__(self, response):
         xpath = xpath_nodeset_intersection(
             "//div[@id='mw-content-text']/h2[span[@id='Basic_Information']]/following-sibling::ul",
-            "//div[@id='mw-content-text']/h2[span[@id='Obtained_By']]/preceding-sibling::ul"
+            "//div[@id='mw-content-text']/h2[span[@id='Obtained_By' or @id='Acquisition']]/preceding-sibling::ul"
         )
         try:
             sel = Selector(text=response.selector.xpath(xpath).get())
@@ -74,14 +69,13 @@ class fishing_spider(scrapy.Spider):
                 "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
                 "size_range": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
             }
-        except ValueError:
-            return None
         except Exception as ex:
             self.logger.error(f"""
                 __parse_fish_basic_info__ exception: {ex}\n
                 sel:{response.selector.xpath(xpath).get()}\n
                 url: {response.url}\n
                 exception_type: {type(ex)}\n
+                cb_kwargs: {response.cb_kwargs}\n
                 """)
             return None
 
@@ -114,12 +108,13 @@ class fishing_spider(scrapy.Spider):
         for idx, drop_info in enumerate(response.selector.xpath(xpath).getall()):
             try:
                 sel = Selector(text=drop_info)
+                hole_level_lookup = sel.xpath("//li[2]/text()").re(r"[0-9.]+")
                 drops.append(
                     FfxivWikiFishDropDetails(location=sel.xpath("//a[@title='Location']/../following-sibling::a[1]/text()").get(),
                                              coordinates=tuple(map(lambda x: float(x), sel.xpath("//li[1]/text()").re(r"[0-9.]+"))),
                                              baits=sel.xpath("//li[3]//a[not(@title='Baits')]/text()").getall(),
                                              fish_log=response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")[0],
-                                             hole_level=int(sel.xpath("//li[2]/text()").re(r"[0-9.]+")[0])))
+                                             hole_level=int(hole_level_lookup[0]) if len(hole_level_lookup) > 0 else 0))
             except Exception as ex:
                 self.logger.error(f"""
                     __parse_fish_drops_info__ exception: {ex}\n
