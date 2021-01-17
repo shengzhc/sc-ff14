@@ -1,3 +1,4 @@
+from functools import reduce
 import scrapy
 import requests
 from scrapy import Selector
@@ -33,6 +34,15 @@ class fishing_spider(scrapy.Spider):
         "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations": ('wikitable', 4),
     }
 
+    def __init__(self, *args, **kwargs):
+        super(scrapy.Spider, self).__init__(*args, **kwargs)
+        self.__unhandled_fishes__ = []
+
+    def close(self, reason):
+        with open('data/unhandled_fishes.data', 'w') as f:
+            if len(self.__unhandled_fishes__) > 0:
+                f.write(reduce(lambda x, y: f"{x},{y}", self.__unhandled_fishes__))
+
     def parse(self, response):
         rows = response.selector.xpath(f"//table[contains(@class, '{self.url_fish_lookup[response.url][0]}')]//tr[position()>1]//td/..").getall()
         col = self.url_fish_lookup[response.url][1]
@@ -48,13 +58,16 @@ class fishing_spider(scrapy.Spider):
         vendors = self.__parse_fish_purchased_from_vendors__(response)
         drops = self.__parse_fish_drops_info__(response)
 
-        yield FfxivWikiFish(name=name,
-                            recommend_level=basic_info["recommend_level"] if basic_info is not None else 0,
-                            fish_type=basic_info["fish_type"] if basic_info is not None else "None",
-                            aquarium_type=basic_info["aquarium_type"] if basic_info is not None else "None",
-                            size_range=basic_info["size_range"] if basic_info is not None else "None",
-                            purchase_from_vendors=vendors if vendors is not None else [],
-                            drops=drops if drops is not None else [])
+        if basic_info is not None:
+            yield FfxivWikiFish(name=name,
+                                recommend_level=basic_info["recommend_level"],
+                                fish_type=basic_info["fish_type"],
+                                aquarium_type=basic_info["aquarium_type"],
+                                size_range=basic_info["size_range"],
+                                purchase_from_vendors=vendors if vendors is not None else [],
+                                drops=drops if drops is not None else [])
+        else:
+            self.__unhandled_fishes__.append(name)
 
     def __parse_fish_basic_info__(self, response):
         xpath = xpath_nodeset_intersection(
