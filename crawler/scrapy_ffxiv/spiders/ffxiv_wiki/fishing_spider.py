@@ -29,6 +29,10 @@ class fishing_spider(scrapy.Spider):
         "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations": 4,
         "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations": 4,
     }
+    __xpath__selector__ = {
+        "basic_info": "//div[@id='mw-content-text']/h2[span[@id='Basic_Information']]/following-sibling::ul[count(preceding-sibling::h2)=1]",
+        "purchased_from": "//div[@id='mw-content-text']/h3[span[@id='Purchased_From']]/following-sibling::ul[count(preceding-sibling::h3)=1]",
+    }
 
     def parse(self, response):
         rows = response.selector.xpath("//table[contains(@class, 'gathering-role')]//tr[position()>1]//td/..")
@@ -39,9 +43,8 @@ class fishing_spider(scrapy.Spider):
             yield response.follow(follow_url, self.parse_fish_page, cb_kwargs=dict(name=name))
 
     def parse_fish_page(self, response, name):
-        basic_info = self.__parse_fish_basic_info__(response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/../following-sibling::*[1]").get())
-        # purchase_info
-        # drop_info = self.__parse_fish_basic_info__(response.selector.xpath("//div[@id='mw-content-text']//span[@id='Basic_Information']/../following-sibling::*[1]").get())
+        basic_info = self.__parse_fish_basic_info__(response.selector.xpath(self.__xpath__selector__["basic_info"]).get())
+        purchased_from = self.__parse_fish_purchased_from_info__(response.selector.xpath(self.__xpath__selector__["purchased_from"]).get())
 
     def __parse_fish_basic_info__(self, basic_info_str):
         sel = Selector(text=basic_info_str)
@@ -51,3 +54,12 @@ class fishing_spider(scrapy.Spider):
             "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
             "size_range_str": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
         }
+
+    def __parse_fish_purchased_from_info__(self, purchase_from_str):
+        sel = Selector(text=purchase_from_str)
+        cnt = int(float(sel.xpath("count(//ul/li)")))
+        return map(lambda idx: {
+            "vendor": sel.xpath(f"//ul/li[{idx+1}]/a[1]/text()").get(),
+            "area": sel.xpath(f"//ul/li[{idx+1}]/a[2]/text()").get(),
+            "coordinates": sel.xpath(f"//ul/li[{idx+1}]/text()").re("[0-9.]+"),
+        }, range(cnt))
