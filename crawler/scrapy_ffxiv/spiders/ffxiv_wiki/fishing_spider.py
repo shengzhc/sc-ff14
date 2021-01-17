@@ -32,6 +32,7 @@ class fishing_spider(scrapy.Spider):
     __xpath__selector__ = {
         "basic_info": "//div[@id='mw-content-text']/h2[span[@id='Basic_Information']]/following-sibling::ul[count(preceding-sibling::h2)=1]",
         "purchased_from": "//div[@id='mw-content-text']/h3[span[@id='Purchased_From']]/following-sibling::ul[count(preceding-sibling::h3)=1]",
+        "drops": "//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]]/following-sibling::ul[count(preceding-sibling::h3)=1]",
     }
 
     def parse(self, response):
