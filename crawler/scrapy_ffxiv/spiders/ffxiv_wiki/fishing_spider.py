@@ -17,10 +17,10 @@ class fishing_spider(scrapy.Spider):
         "ffxiv.consolegameswiki.com",
     ]
     start_urls = [
-        # "https://ffxiv.consolegameswiki.com/wiki/Fishing_Locations",
-        # "https://ffxiv.consolegameswiki.com/wiki/Heavensward_Fishing_Locations",
+        "https://ffxiv.consolegameswiki.com/wiki/Fishing_Locations",
+        "https://ffxiv.consolegameswiki.com/wiki/Heavensward_Fishing_Locations",
         "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations",
-        # "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations",
+        "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations",
     ]
 
     site_base = "https://ffxiv.consolegameswiki.com/"
