@@ -49,7 +49,7 @@ class fishing_spider(scrapy.Spider):
                              aquarium_type=basic_info["aquarium_type"] if basic_info is not None else "None",
                              size_range=basic_info["size_range"] if basic_info is not None else "None",
                              purchase_from_vendors=vendors if vendors is not None else [],
-                             drops=drops if drops not None else [])
+                             drops=drops if drops is not None else [])
 
     def __parse_fish_basic_info__(self, response):
         xpath = xpath_nodeset_intersection(
