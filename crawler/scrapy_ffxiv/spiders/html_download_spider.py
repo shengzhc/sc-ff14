@@ -9,7 +9,6 @@ class HtmlDownloadSpider(scrapy.Spider):
 
     def parse(self, response):
         page = response.url.split("/")[-2]
-        breakpoint()
         filename = f'temp/{page}.html'
         with open(filename, 'wb') as f:
             f.write(response.body)
