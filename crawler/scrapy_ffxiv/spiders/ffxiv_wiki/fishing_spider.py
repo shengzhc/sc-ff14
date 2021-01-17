@@ -44,37 +44,45 @@ class fishing_spider(scrapy.Spider):
         vendors = self.__parse_fish_purchased_from_vendors__(response)
         drops = self.__parse_fish_drops_info__(response)
         return FfxivWikiFish(name=name,
-                             recommend_level=basic_info["recommend_level"],
-                             fish_type=basic_info["fish_type"],
-                             aquarium_type=basic_info["aquarium_type"],
-                             size_range=basic_info["size_range"],
-                             purchase_from_vendors=vendors,
-                             drops=drops)
+                             recommend_level=basic_info["recommend_level"] if basic_info is not None else 0,
+                             fish_type=basic_info["fish_type"] if basic_info is not None else "None",
+                             aquarium_type=basic_info["aquarium_type"] if basic_info is not None else "None",
+                             size_range=basic_info["size_range"] if basic_info is not None else "None",
+                             purchase_from_vendors=vendors if vendors is not None else [],
+                             drops=drops if drops not None else [])
 
     def __parse_fish_basic_info__(self, response):
         xpath = xpath_nodeset_intersection(
             "//div[@id='mw-content-text']/h2[span[@id='Basic_Information']]/following-sibling::ul",
             "//div[@id='mw-content-text']/h2[span[@id='Obtained_By']]/preceding-sibling::ul"
         )
-        sel = Selector(text=response.selector.xpath(xpath).get())
-        return {
-            "recommend_level": int(sel.xpath("//li[1]/text()").re(r"\d+$")[0]),
-            "fish_type": sel.xpath("//li[2]/a[1]/text()").get(),
-            "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
-            "size_range": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
-        }
+        try:
+            sel = Selector(text=response.selector.xpath(xpath).get())
+            return {
+                "recommend_level": int(sel.xpath("//li[1]/text()").re(r"\d+$")[0]),
+                "fish_type": sel.xpath("//li[2]/a[1]/text()").get(),
+                "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
+                "size_range": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
+            }
+        except Exception as ex:
+            self.logger.error(f"__parse_fish_basic_info__ exception: {ex} \n sel:{response.selector.xpath(xpath).get()}")
+            return None
 
     def __parse_fish_purchased_from_vendors__(self, response):
         xpath = xpath_nodeset_intersection(
             "//div[@id='mw-content-text']/h3[span[@id='Purchased_From']]/following-sibling::ul",
             "//div[@id='mw-content-text']/h3[span[@id='Dropped_By']]/preceding-sibling::ul"
         )
-        sel = Selector(text=response.selector.xpath(xpath).get())
-        cnt = int(float(sel.xpath("count(//ul/li)").get()))
-        return list(map(lambda idx: FfxivWikiFishPurchaseFromVendor(name=sel.xpath(f"//ul/li[{idx+1}]/a[1]/text()").get(),
-                                                                    area=sel.xpath(f"//ul/li[{idx+1}]/a[2]/text()").get(),
-                                                                    coordinates=tuple(map(lambda x: float(x), sel.xpath(f"//ul/li[{idx+1}]/text()").re(r"[0-9.]+")))),
-                        range(cnt)))
+        try:
+            sel = Selector(text=response.selector.xpath(xpath).get())
+            cnt = int(float(sel.xpath("count(//ul/li)").get()))
+            return list(map(lambda idx: FfxivWikiFishPurchaseFromVendor(name=sel.xpath(f"//ul/li[{idx+1}]/a[1]/text()").get(),
+                                                                        area=sel.xpath(f"//ul/li[{idx+1}]/a[2]/text()").get(),
+                                                                        coordinates=tuple(map(lambda x: float(x), sel.xpath(f"//ul/li[{idx+1}]/text()").re(r"[0-9.]+")))),
+                            range(cnt)))
+        except Exception as ex:
+            self.logger.error(f"__parse_fish_purchased_from_vendors__ exception: {ex} \n sel:{response.selector.xpath(xpath).get()}")
+            return None
 
     def __parse_fish_drops_info__(self, response):
         xpath = xpath_nodeset_intersection(
@@ -83,11 +91,14 @@ class fishing_spider(scrapy.Spider):
         )
         drops = []
         for idx, drop_info in enumerate(response.selector.xpath(xpath).getall()):
-            sel = Selector(text=drop_info)
-            drops.append(
-                FfxivWikiFishDropDetails(location=sel.xpath("//a[@title='Location']/../following-sibling::a[1]/text()").get(),
-                                         coordinates=tuple(map(lambda x: float(x), sel.xpath("//li[1]/text()").re(r"[0-9.]+"))),
-                                         baits=sel.xpath("//li[3]//a[not(@title='Baits')]/text()").getall(),
-                                         fish_log=response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")[0],
-                                         hole_level=int(sel.xpath("//li[2]/text()").re(r"[0-9.]+")[0])))
+            try:
+                sel = Selector(text=drop_info)
+                drops.append(
+                    FfxivWikiFishDropDetails(location=sel.xpath("//a[@title='Location']/../following-sibling::a[1]/text()").get(),
+                                             coordinates=tuple(map(lambda x: float(x), sel.xpath("//li[1]/text()").re(r"[0-9.]+"))),
+                                             baits=sel.xpath("//li[3]//a[not(@title='Baits')]/text()").getall(),
+                                             fish_log=response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")[0],
+                                             hole_level=int(sel.xpath("//li[2]/text()").re(r"[0-9.]+")[0])))
+            except Exception as ex:
+                self.logger.error(f"__parse_fish_drops_info__ exception: {ex} \n sel:{drop_info}")
         return drops
