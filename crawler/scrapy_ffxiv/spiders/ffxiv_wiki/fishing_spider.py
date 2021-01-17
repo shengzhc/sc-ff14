@@ -1,7 +1,7 @@
 import scrapy
 import requests
-from scrapy_ffxiv.items.ffxiv_wiki_fish import FfxivWikiFish, FfxivWikiFishDropDetails
 from scrapy import Selector
+from scrapy_ffxiv.items.ffxiv_wiki_fish import FfxivWikiFish, FfxivWikiFishDropDetails, FfxivWikiFishPurchaseFromVendor
 from scrapy_ffxiv.spiders.utils.xpath_utils import xpath_nodeset_intersection
 
 
@@ -41,8 +41,15 @@ class fishing_spider(scrapy.Spider):
 
     def __parse_fish_page__(self, response, name):
         basic_info = self.__parse_fish_basic_info__(response)
-        purchased_from = self.__parse_fish_purchased_from_info__(response)
+        vendors = self.__parse_fish_purchased_from_vendors__(response)
         drops = self.__parse_fish_drops_info__(response)
+        return FfxivWikiFish(name=name,
+                             recommend_level=basic_info["recommend_level"],
+                             fish_type=basic_info["fish_type"],
+                             aquarium_type=basic_info["aquarium_type"],
+                             size_range=basic_info["size_range"],
+                             purchase_from_vendors=vendors,
+                             drops=drops)
 
     def __parse_fish_basic_info__(self, response):
         xpath = xpath_nodeset_intersection(
@@ -54,21 +61,20 @@ class fishing_spider(scrapy.Spider):
             "recommend_level": int(sel.xpath("//li[1]/text()").re(r"\d+$")[0]),
             "fish_type": sel.xpath("//li[2]/a[1]/text()").get(),
             "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
-            "size_range_str": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
+            "size_range": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
         }
 
-    def __parse_fish_purchased_from_info__(self, response):
+    def __parse_fish_purchased_from_vendors__(self, response):
         xpath = xpath_nodeset_intersection(
             "//div[@id='mw-content-text']/h3[span[@id='Purchased_From']]/following-sibling::ul",
             "//div[@id='mw-content-text']/h3[span[@id='Dropped_By']]/preceding-sibling::ul"
         )
         sel = Selector(text=response.selector.xpath(xpath).get())
         cnt = int(float(sel.xpath("count(//ul/li)").get()))
-        return list(map(lambda idx: {
-            "vendor": sel.xpath(f"//ul/li[{idx+1}]/a[1]/text()").get(),
-            "area": sel.xpath(f"//ul/li[{idx+1}]/a[2]/text()").get(),
-            "coordinates": tuple(map(lambda x: float(x), sel.xpath(f"//ul/li[{idx+1}]/text()").re(r"[0-9.]+"))),
-        }, range(cnt)))
+        return list(map(lambda idx: FfxivWikiFishPurchaseFromVendor(name=sel.xpath(f"//ul/li[{idx+1}]/a[1]/text()").get(),
+                                                                    area=sel.xpath(f"//ul/li[{idx+1}]/a[2]/text()").get(),
+                                                                    coordinates=tuple(map(lambda x: float(x), sel.xpath(f"//ul/li[{idx+1}]/text()").re(r"[0-9.]+")))),
+                        range(cnt)))
 
     def __parse_fish_drops_info__(self, response):
         xpath = xpath_nodeset_intersection(
@@ -78,11 +84,10 @@ class fishing_spider(scrapy.Spider):
         drops = []
         for idx, drop_info in enumerate(response.selector.xpath(xpath).getall()):
             sel = Selector(text=drop_info)
-            drops.append({
-                "location": sel.xpath("//a[@title='Location']/../following-sibling::a[1]/text()").get(),
-                "coordinates": tuple(map(lambda x: float(x), sel.xpath("//li[1]/text()").re(r"[0-9.]+"))),
-                "hole_level": int(sel.xpath("//li[2]/text()").re(r"[0-9.]+")[0]),
-                "baits": sel.xpath("//li[3]//a[not(@title='Baits')]/text()").getall(),
-                "fishing_log": response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")[0],
-            })
+            drops.append(
+                FfxivWikiFishDropDetails(location=sel.xpath("//a[@title='Location']/../following-sibling::a[1]/text()").get(),
+                                         coordinates=tuple(map(lambda x: float(x), sel.xpath("//li[1]/text()").re(r"[0-9.]+"))),
+                                         baits=sel.xpath("//li[3]//a[not(@title='Baits')]/text()").getall(),
+                                         fish_log=response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")[0],
+                                         hole_level=int(sel.xpath("//li[2]/text()").re(r"[0-9.]+")[0])))
         return drops
