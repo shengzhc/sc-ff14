@@ -24,17 +24,19 @@ class fishing_spider(scrapy.Spider):
     ]
 
     site_base = "https://ffxiv.consolegameswiki.com/"
-    fish_column = {
-        "https://ffxiv.consolegameswiki.com/wiki/Fishing_Locations": 6,
-        "https://ffxiv.consolegameswiki.com/wiki/Heavensward_Fishing_Locations": 4,
-        "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations": 4,
-        "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations": 4,
+
+    # url-based lookup config map. Each value is (key_table_class_name, fish_column_index)
+    url_fish_lookup = {
+        "https://ffxiv.consolegameswiki.com/wiki/Fishing_Locations": ('gathering-role', 6),
+        "https://ffxiv.consolegameswiki.com/wiki/Heavensward_Fishing_Locations": ('gathering-role', 4),
+        "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations": ('wikitable', 4),
+        "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations": ('wikitable', 4),
     }
 
     def parse(self, response):
-        rows = response.selector.xpath("//table[contains(@class, 'gathering-role')]//tr[position()>1]//td/..")
+        rows = response.selector.xpath(f"//table[contains(@class, '{self.url_fish_lookup[response.url][0]}')]//tr[position()>1]//td/..")
         for row in rows:
-            col = self.fish_column[response.url]
+            col = self.url_fish_lookup[response.url][1]
             name = row.xpath(f"td[{col}]/a/text()").get()
             follow_url = requests.compat.urljoin(self.site_base, row.xpath(f"td[{col}]/a/@href").get())
             yield response.follow(follow_url, self.__parse_fish_page__, cb_kwargs=dict(name=name, parent_url=response.url))
