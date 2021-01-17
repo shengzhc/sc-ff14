@@ -23,6 +23,12 @@ for (_, module_name, _) in iter_modules([package_dir]):
             # Add the class to this package's variables
             globals()[attribute_name] = attribute
 
-# Remove the last log file if exists
-if os.path.exists("latest.log"):
-    os.remove("latest.log")
+# Remove the log files if exists
+log_files = [
+    "log/error.log",
+    "log/latest.log",
+]
+
+for log_file in log_files:
+    if os.path.exists(log_file):
+        os.remove(log_file)
