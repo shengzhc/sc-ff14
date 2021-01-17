@@ -65,7 +65,11 @@ class fishing_spider(scrapy.Spider):
                 "size_range": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
             }
         except Exception as ex:
-            self.logger.error(f"__parse_fish_basic_info__ exception: {ex} \n sel:{response.selector.xpath(xpath).get()}")
+            self.logger.error(f"""
+                __parse_fish_basic_info__ exception: {ex} \n
+                sel:{response.selector.xpath(xpath).get()}\n
+                url: {response.url}\n
+                """)
             return None
 
     def __parse_fish_purchased_from_vendors__(self, response):
@@ -81,7 +85,11 @@ class fishing_spider(scrapy.Spider):
                                                                         coordinates=tuple(map(lambda x: float(x), sel.xpath(f"//ul/li[{idx+1}]/text()").re(r"[0-9.]+")))),
                             range(cnt)))
         except Exception as ex:
-            self.logger.error(f"__parse_fish_purchased_from_vendors__ exception: {ex} \n sel:{response.selector.xpath(xpath).get()}")
+            self.logger.error(f"""
+                __parse_fish_purchased_from_vendors__ exception: {ex} \n
+                sel:{response.selector.xpath(xpath).get()}\n
+                url: {response.url}\n
+                """)
             return None
 
     def __parse_fish_drops_info__(self, response):
@@ -100,5 +108,9 @@ class fishing_spider(scrapy.Spider):
                                              fish_log=response.selector.xpath(f"//div[@id='mw-content-text']/h3[span[contains(@id, 'Fishing_Log')]][{idx+1}]/span[1]/text()").re(r": (.*)")[0],
                                              hole_level=int(sel.xpath("//li[2]/text()").re(r"[0-9.]+")[0])))
             except Exception as ex:
-                self.logger.error(f"__parse_fish_drops_info__ exception: {ex} \n sel:{drop_info}")
+                self.logger.error(f"""
+                    __parse_fish_drops_info__ exception: {ex} \n
+                    sel:{drop_info}\n
+                    url: {response.url}\n
+                    """)
         return drops
