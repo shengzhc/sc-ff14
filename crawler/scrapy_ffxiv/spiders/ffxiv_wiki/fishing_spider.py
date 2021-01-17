@@ -19,8 +19,8 @@ class fishing_spider(scrapy.Spider):
     start_urls = [
         # "https://ffxiv.consolegameswiki.com/wiki/Fishing_Locations",
         # "https://ffxiv.consolegameswiki.com/wiki/Heavensward_Fishing_Locations",
-        # "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations",
-        "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations",
+        "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations",
+        # "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations",
     ]
 
     site_base = "https://ffxiv.consolegameswiki.com/"
@@ -63,8 +63,9 @@ class fishing_spider(scrapy.Spider):
         )
         try:
             sel = Selector(text=response.selector.xpath(xpath).get())
+            recommend_level_lookup = sel.xpath("//li[1]/text()").re(r"\d+$")
             return {
-                "recommend_level": int(sel.xpath("//li[1]/text()").re(r"\d+$")[0]),
+                "recommend_level": int(recommend_level_lookup[0]) if len(recommend_level_lookup) > 0 else 0,
                 "fish_type": sel.xpath("//li[2]/a[1]/text()").get(),
                 "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
                 "size_range": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
