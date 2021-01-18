@@ -82,11 +82,12 @@ class fishing_spider(scrapy.Spider):
         try:
             sel = Selector(text=response.selector.xpath(xpath).get())
             recommend_level_lookup = sel.xpath("//li[1]/text()").re(r"\d+$")
+            size_range_lookup = sel.xpath("//li[4]/text()").re("[a-zA-Z].+$")
             return {
                 "recommend_level": int(recommend_level_lookup[0]) if len(recommend_level_lookup) > 0 else 0,
                 "fish_type": sel.xpath("//li[2]/a[1]/text()").get(),
                 "aquarium_type": sel.xpath("//li[3]/a[1]/text()").get(),
-                "size_range": sel.xpath("//li[4]/text()").re("[a-zA-Z].+$"),
+                "size_range": size_range_lookup[0] if len(size_range_lookup) > 0 else "None",
             }
         except Exception as ex:
             self.logger.error(f"""
