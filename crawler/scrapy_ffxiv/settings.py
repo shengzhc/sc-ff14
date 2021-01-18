@@ -67,12 +67,13 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeValidationPipeline': 100,
-    # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeDedupPipeline': 101,
-    # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeJSONPipeline': 102,
-    # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeMysqlPipeline': 103,
-}
+# Configure it at the spider level
+# ITEM_PIPELINES = {
+#     # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeValidationPipeline': 100,
+#     # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeDedupPipeline': 101,
+#     # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeJSONPipeline': 102,
+#     # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeMysqlPipeline': 103,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

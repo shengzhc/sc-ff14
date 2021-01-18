@@ -23,6 +23,14 @@ class fishing_spider(scrapy.Spider):
         "https://ffxiv.consolegameswiki.com/wiki/Stormblood_Fishing_Locations",
         "https://ffxiv.consolegameswiki.com/wiki/Shadowbringers_Fishing_Locations",
     ]
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeValidationPipeline': 100,
+            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeDedupPipeline': 101,
+            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeJSONPipeline': 102,
+            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeMysqlPipeline': 103,
+        },
+    }
 
     site_base = "https://ffxiv.consolegameswiki.com/"
 
