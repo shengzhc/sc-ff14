@@ -25,7 +25,7 @@ class fishing_spider(scrapy.Spider):
     ]
     custom_settings = {
         'ITEM_PIPELINES': {
-            'scrapy_ffxiv.pipelines.ffxiv_wiki.FfxivWikiFishDedupPipeline': 100,
+            'scrapy_ffxiv.pipelines.fish.FfxivWikiFishDedupPipeline': 100,
         },
     }
 
