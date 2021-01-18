@@ -25,10 +25,7 @@ class fishing_spider(scrapy.Spider):
     ]
     custom_settings = {
         'ITEM_PIPELINES': {
-            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeValidationPipeline': 100,
-            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeDedupPipeline': 101,
-            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeJSONPipeline': 102,
-            # 'scrapy_ffxiv.pipelines.FfxivGatheringNodeMysqlPipeline': 103,
+            'scrapy_ffxiv.pipelines.ffxiv_wiki.FfxivWikiFishDedupPipeline': 100,
         },
     }
 
