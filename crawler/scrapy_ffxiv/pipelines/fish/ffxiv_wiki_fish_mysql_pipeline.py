@@ -48,6 +48,9 @@ class FfxivWikiMysqlPipeline:
         """,
     ]
 
+    __DB_QUERIES__ = [
+    ]
+
     def __init__(self):
         self.dbconnection = None
         with open('db/dbconfig.yml', 'r') as f:
