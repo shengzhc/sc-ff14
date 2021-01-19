@@ -46,9 +46,27 @@ class FfxivWikiMysqlPipeline:
             `name` varchar(256) NOT NULL,
         PRIMARY KEY(`id`)) ENGINE = InnoDB
         """,
+
+        """
+        CREATE TABLE IF NOT EXISTS `fish_to_vendor` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `fish_id` int(11) NOT NULL,
+            `vendor_id` int(11) NOT NULL,
+        PRIMARY KEY(`id`)) ENGINE = InnoDB
+        """
+
+        """
+        CREATE TABLE IF NOT EXISTS `fish_to_fish_drop` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `fish_id` int(11) NOT NULL,
+            `fish_drop_id` int(11) NOT NULL,
+        PRIMARY KEY(`id`)) ENGINE = InnoDB
+        """
     ]
 
     __DB_QUERIES__ = [
+        """
+        """
     ]
 
     def __init__(self):
@@ -84,8 +102,8 @@ class FfxivWikiMysqlPipeline:
             self.dbconnection.close()
 
     def process_item(self, item, spider):
-        # adapter = ItemAdapter(item)
-        # if self.cursor and self.dbconnection:
-        #     self.cursor.execute(self.__class__.add_gathering_node,
-        #                         (adapter['name'], adapter['location'], adapter['time'], adapter['gclass']))
+        fish = ItemAdapter(item)
+        if self.cursor and self.dbconnection:
+            self.cursor.execute(self.__class__.add_gathering_node,
+                                (adapter['name'], adapter['location'], adapter['time'], adapter['gclass']))
         return item
